@@ -1,6 +1,8 @@
 import Web3 from 'web3'
+import dotenv from 'dotenv'
+dotenv.config()
 
-const web3 = new Web3('http://34.101.153.230:8545')
+const web3 = new Web3(process.env.RPCURL as string)
 
 export const getLatestBlockNumber = async () => {
 	const blockNumber = await web3.eth.getBlockNumber()
