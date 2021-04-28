@@ -1,5 +1,5 @@
 import Fastify from 'fastify'
-import { getLatestBlockNumber, getBlock } from './web3'
+import { getLatestBlockNumber, getBlock, getTransaction } from './web3'
 
 const fastify = Fastify({ logger: true })
 
@@ -20,6 +20,16 @@ fastify.get('/api/block/:blockNumber', async (req, res) => {
 	const block = await getBlock(parseInt(params.blockNumber))
 	if (!block) return res.status(404).send({ error: 'Block not found' })
 	return res.send(block)
+})
+
+fastify.get('/api/tx/:tx', async (req, res) => {
+	const params: any = req.params
+	if (!params.tx) {
+		return res.status(400).send()
+	}
+	const tx = await getTransaction(params.tx)
+	if (!tx) return res.status(404).send({ error: 'Transaction not found' })
+	return res.send(tx)
 })
 
 export default fastify

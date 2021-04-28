@@ -13,3 +13,7 @@ export const getBlock = async (blockNumber: number) => {
 	const block = await web3.eth.getBlock(blockNumber)
 	return block
 }
+
+export const getTransaction = async (tx: string) => {
+	return web3.eth.getTransaction(tx)
+}
