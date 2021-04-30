@@ -20,7 +20,7 @@ const init = async () => {
 		return process.exit(0)
 	}
 
-	for (let num = 35500; num <= latestBlockNumber; num += 100) {
+	for (let num = 0; num <= latestBlockNumber; num += 100) {
 		const insertBlockOps: Promise<any>[] = []
 		const txs: Transaction[] = []
 		const getBlockOps: Promise<any>[] = []
