@@ -26,7 +26,6 @@
    "devDependencies": {
       "@types/dotenv": "^8.2.0",
       "@types/node": "^8.0.29",
-      "@types/web3": "^1.2.2",
       "eslint": "^7.25.0",
       "eslint-config-prettier": "^8.3.0",
       "eslint-plugin-prettier": "^3.4.0",
