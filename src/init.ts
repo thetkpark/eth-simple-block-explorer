@@ -3,6 +3,7 @@ const Web3 = require('web3')
 import { config } from 'dotenv'
 import { Connection, createConnection } from 'typeorm'
 import { Block } from './entity/Block'
+import { Transaction } from './entity/Transaction'
 
 config()
 
@@ -19,17 +20,18 @@ const init = async () => {
 		return process.exit(0)
 	}
 
-	let insertBlockOps: Promise<Block>[] = []
-
-	for (let num = 0; num <= latestBlockNumber; num += 100) {
+	for (let num = 35500; num <= latestBlockNumber; num += 100) {
+		const insertBlockOps: Promise<any>[] = []
+		const txs: Transaction[] = []
 		const getBlockOps: Promise<any>[] = []
-		for (let i = num; i < num + 100 && i <= latestBlockNumber; i++) {
-			getBlockOps.push(web3.eth.getBlock(i))
+		for (let i = 0; i < 100 && i + num <= latestBlockNumber; i++) {
+			getBlockOps.push(web3.eth.getBlock(i + num))
 		}
-		const getBlocks = await Promise.all(getBlockOps)
-		const insertBlockOps = getBlocks.map(block => {
+		const blocks = await Promise.all(getBlockOps)
+		for (let j = 0; j < blocks.length; j++) {
+			const block = blocks[j]
 			const recordBlock = new Block()
-			recordBlock.difficulty = block.difficulty.toString()
+			recordBlock.difficulty = block.difficulty ? block.difficulty.toString() : undefined
 			recordBlock.extraData = block.extraData
 			recordBlock.gasLimit = block.gasLimit
 			recordBlock.gasUsed = block.gasUsed
@@ -44,15 +46,44 @@ const init = async () => {
 			recordBlock.size = block.size
 			recordBlock.stateRoot = block.stateRoot
 			recordBlock.timestamp = new Date(block.timestamp)
-			recordBlock.totalDifficulty = block.totalDifficulty.toString()
+			recordBlock.totalDifficulty = block.totalDifficulty ? block.totalDifficulty.toString() : undefined
 			recordBlock.transactionsRoot = block.transactionRoot
-			return conn.getRepository(Block).save(recordBlock)
-		})
+			// recordBlock.transactions = []
+
+			for (let i = 0; i < block.transactions.length; i++) {
+				const txHash = block.transactions[i]
+				const tx = await web3.eth.getTransaction(txHash)
+				const transaction = new Transaction()
+				transaction.blockHash = tx.blockHash
+				transaction.block = recordBlock
+				transaction.from = tx.from
+				transaction.gas = tx.gas
+				transaction.gasPrice = tx.gasPrice
+				transaction.hash = tx.hash
+				transaction.input = tx.input
+				transaction.nonce = tx.nonce
+				transaction.to = tx.to
+				transaction.transactionIndex = tx.transactionIndex
+				transaction.value = tx.value
+				transaction.type = tx.type
+				transaction.v = tx.v
+				transaction.s = tx.s
+				transaction.r = tx.r
+
+				txs.push(transaction)
+			}
+
+			insertBlockOps.push(conn.manager.save(recordBlock))
+		}
 
 		await Promise.all(insertBlockOps)
+		await conn.manager.save(txs)
 		console.log(`Finish on block ${num} to ${num + insertBlockOps.length}`)
 	}
 	const totalBlockInDbNew = await conn.getRepository(Block).count()
+	console.log('---------------------------------------------')
+	console.log(`Lastest Block from the network: ${latestBlockNumber}`)
+	console.log(`Number of block in DB: ${totalBlockInDb}`)
 	if (latestBlockNumber === totalBlockInDbNew) {
 		console.info(`Done`)
 		console.info(`Database is in sync with the latest block ${latestBlockNumber}`)
