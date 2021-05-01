@@ -15,7 +15,7 @@ const init = async () => {
 	const totalBlockInDb = await conn.getRepository(Block).count()
 	console.log(`Lastest Block from the network: ${latestBlockNumber}`)
 	console.log(`Number of block in DB: ${totalBlockInDb}`)
-	if (latestBlockNumber === totalBlockInDb) {
+	if (latestBlockNumber + 1 === totalBlockInDb) {
 		console.info(`Database is in sync with the latest block ${latestBlockNumber}`)
 		return process.exit(0)
 	}
@@ -84,7 +84,7 @@ const init = async () => {
 	console.log('---------------------------------------------')
 	console.log(`Lastest Block from the network: ${latestBlockNumber}`)
 	console.log(`Number of block in DB: ${totalBlockInDb}`)
-	if (latestBlockNumber === totalBlockInDbNew) {
+	if (latestBlockNumber + 1 === totalBlockInDbNew) {
 		console.info(`Done`)
 		console.info(`Database is in sync with the latest block ${latestBlockNumber}`)
 		process.exit(0)
