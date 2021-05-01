@@ -48,7 +48,6 @@ const init = async () => {
 			recordBlock.timestamp = new Date(block.timestamp)
 			recordBlock.totalDifficulty = block.totalDifficulty ? block.totalDifficulty.toString() : undefined
 			recordBlock.transactionsRoot = block.transactionRoot
-			// recordBlock.transactions = []
 
 			for (let i = 0; i < block.transactions.length; i++) {
 				const txHash = block.transactions[i]
@@ -78,7 +77,7 @@ const init = async () => {
 
 		await Promise.all(insertBlockOps)
 		await conn.manager.save(txs)
-		console.log(`Finish on block ${num} to ${num + insertBlockOps.length}`)
+		console.log(`Finish on block ${num} to ${num + insertBlockOps.length - 1}`)
 	}
 	const totalBlockInDbNew = await conn.getRepository(Block).count()
 	console.log('---------------------------------------------')
